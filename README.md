@@ -1,12 +1,7 @@
 
 
 <div align="center">
-  <h1><b>Book an appointment | Places</b></h1>
-  <img src="public/places.jpg" />
-  <img src="public/reserve.jpg" />
-  <img src="public/my-reservations.jpg" />
-  <img src="public/delete.jpg" />
-  <img src="public/add-place.jpg" />
+  <h1><b>Eshop with Node.js</b></h1>
 </div>
 
 # 📗 Table of Contents
@@ -30,7 +25,7 @@
 - [❓ FAQ](#faq)
 - [📝 License](#license)
 
-# 📖 Book an appointment | Places <a name="about-project"></a>
+# 📖 Eshop with Node.js <a name="about-project"></a>
 
 > This is a full-stack built with Node.js.
 
