@@ -87,12 +87,12 @@ exports.postCartDeleteProduct = (req, res, next) => {
     });
 };
 
-exports.getOrders = (req, res, next) => {
-  res.render("shop/orders", {
-    path: "/orders",
-    pageTitle: "Your Orders",
-  });
-};
+// exports.getOrders = (req, res, next) => {
+//   res.render("shop/orders", {
+//     path: "/orders",
+//     pageTitle: "Your Orders",
+//   });
+// };
 
 exports.postOrder = (req, res, next) => {
   req.user
@@ -123,13 +123,12 @@ exports.postOrder = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  req.user
-    .getOrders()
+  Order.find({ "user.userId": req.user._id })
     .then((orders) => {
       console.log(orders);
       res.render("shop/orders", {
         path: "/orders",
-        pageTitle: "YOur Orders",
+        pageTitle: "Your Orders",
         orders: orders,
       });
     })
