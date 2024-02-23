@@ -61,7 +61,7 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-> You need the following tools be installed in your computer:
+> You need the following tools to be installed on your computer:
 
 > - [Node]
 
