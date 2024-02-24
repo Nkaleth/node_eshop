@@ -1,5 +1,16 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
+require("dotenv").config();
+const mailchimpTx = require("@mailchimp/mailchimp_transactional")(
+  process.env.MAILCHIMP_API_KEY
+);
+
+async function welcomeEmail(message) {
+  const response = await mailchimpTx.messages.send({
+    message,
+  });
+  console.log(response);
+}
 
 exports.getLogin = (req, res, next) => {
   let message = req.flash("error");
@@ -84,6 +95,20 @@ exports.postSignup = (req, res, next) => {
         })
         .then((result) => {
           res.redirect("/login");
+          const message = {
+            from_email: "nilton.segura@nsegura.info",
+            subject: "Signup suceeded!",
+            html: "<h1>You suceessfully signed up!</h1>",
+            to: [
+              {
+                email: email,
+                type: "to",
+              },
+            ],
+          };
+          welcomeEmail(message).catch((err) => {
+            console.log(err);
+          });
         });
     })
     .catch((err) => {
