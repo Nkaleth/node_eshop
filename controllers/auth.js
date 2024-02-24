@@ -94,6 +94,7 @@ exports.postSignup = (req, res, next) => {
           return user.save();
         })
         .then((result) => {
+          res.redirect("/login");
           const message = {
             from_email: "nilton.segura@nsegura.info",
             subject: "Signup suceeded!",
@@ -105,8 +106,9 @@ exports.postSignup = (req, res, next) => {
               },
             ],
           };
-          welcomeEmail(message);
-          res.redirect("/login");
+          welcomeEmail(message).catch((err) => {
+            console.log(err);
+          });
         });
     })
     .catch((err) => {
