@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 require("dotenv").config();
@@ -134,5 +135,48 @@ exports.getReset = (req, res, next) => {
     path: "reset",
     pageTitle: "Reset Password",
     errorMessage: message,
+  });
+};
+
+exports.postReset = (req, res, next) => {
+  crypto.randomBytes(32, (err, buffer) => {
+    if (err) {
+      console.log(err);
+      return res.redirect("/reset");
+    }
+    const token = buffer.toString("hex");
+    User.findOne({ email: req.body.email })
+      .then((user) => {
+        if (!user) {
+          req.flash("errr", "No account with taht email found.");
+          return res.redirect("/reset");
+        }
+        user.resetToken = token;
+        user.resetTokenExpiration = Date.now() + 3600000;
+        return user.save();
+      })
+      .then((result) => {
+        res.redirect("/");
+        const message = {
+          from_email: "nilton.segura@nsegura.info",
+          subject: "Password reset",
+          html: `
+            <p>You requested a password reset</p>
+            <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set a new password</p>
+          `,
+          to: [
+            {
+              email: "nilton.segura@nsegura.info",
+              type: "to",
+            },
+          ],
+        };
+        welcomeEmail(message).catch((err) => {
+          console.log(err);
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   });
 };
