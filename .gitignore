@@ -128,3 +128,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+#Commits logs
+COMMIT_LOG.md
+COMMIT_LOG2.md
+generate_commit_log.py
