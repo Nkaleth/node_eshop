@@ -100,7 +100,7 @@ exports.getCart = (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
-        isAuthenticated: req.session.isLoggedIn,
+        // isAuthenticated: req.session.isLoggedIn,
       });
       console.log(products);
     })
@@ -148,6 +148,32 @@ exports.postCartDeleteProduct = (req, res, next) => {
 //     pageTitle: "Your Orders",
 //   });
 // };
+
+exports.getCheckout = (req, res, next) => {
+  req.user
+    .populate("cart.items.productId")
+    .then((user) => {
+      console.log(user.cart.items);
+      const products = user.cart.items;
+      let total = 0;
+      products.forEach((p) => {
+        total += p.quantity * p.productId.price;
+      });
+      res.render("shop/checkout", {
+        path: "/checkout",
+        pageTitle: "Checkout",
+        products: products,
+        totalSum: total,
+        // isAuthenticated: req.session.isLoggedIn,
+      });
+      console.log(products);
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
 
 exports.postOrder = (req, res, next) => {
   req.user
