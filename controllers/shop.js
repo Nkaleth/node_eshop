@@ -4,6 +4,9 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 
 const PDFDocument = require("pdfkit");
+const stripe = require("stripe")(
+  "sk_test_51OyzVLDx6l21GOY3091lau2QNRzVOnEXmp5Yqyv1CygcpTcehsUx7WLHV4W0LJMlObdX0HTtcK2UWxsNKGPQHtBd00kfEja2xR"
+);
 
 const ITEMS_PER_PAGE = 2;
 
@@ -100,7 +103,7 @@ exports.getCart = (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
-        isAuthenticated: req.session.isLoggedIn,
+        // isAuthenticated: req.session.isLoggedIn,
       });
       console.log(products);
     })
@@ -149,11 +152,42 @@ exports.postCartDeleteProduct = (req, res, next) => {
 //   });
 // };
 
-exports.postOrder = (req, res, next) => {
+exports.getCheckout = (req, res, next) => {
   req.user
     .populate("cart.items.productId")
     .then((user) => {
       console.log(user.cart.items);
+      const products = user.cart.items;
+      let total = 0;
+      products.forEach((p) => {
+        total += p.quantity * p.productId.price;
+      });
+      res.render("shop/checkout", {
+        path: "/checkout",
+        pageTitle: "Checkout",
+        products: products,
+        totalSum: total,
+        // isAuthenticated: req.session.isLoggedIn,
+      });
+      console.log(products);
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
+
+exports.postOrder = (req, res, next) => {
+  const token = req.body.stripeToken;
+  let totalSum = 0;
+
+  req.user
+    .populate("cart.items.productId")
+    .then((user) => {
+      user.cart.items.forEach((p) => {
+        totalSum += p.quantity * p.productId.price;
+      });
       const products = user.cart.items.map((i) => {
         return { quantity: i.quantity, product: { ...i.productId._doc } };
       });
@@ -166,7 +200,14 @@ exports.postOrder = (req, res, next) => {
       });
       return order.save();
     })
-    .then(() => {
+    .then((result) => {
+      const charge = stripe.charges.create({
+        amount: totalSum * 100,
+        currency: "usd",
+        description: "Demo order",
+        source: token,
+        metadata: { order_id: result._id.toString() },
+      });
       return req.user.clearCart();
     })
     .then(() => {
